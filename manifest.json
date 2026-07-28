@@ -1,0 +1,27 @@
+{
+  "name": "حاسبة مصنعية التشطيبات",
+  "short_name": "مصنعية",
+  "description": "حاسبة مصنعية الدهانات والجبس والديكورات والأخشاب للمقاولات والتشطيبات",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f2ede4",
+  "theme_color": "#1f3542",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
