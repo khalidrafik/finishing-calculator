@@ -86,14 +86,14 @@
     overflow-x:auto;
   }
   nav.tabs button{
-    flex:1;
-    min-width:120px;
-    padding:13px 10px;
+    flex:0 0 auto;
+    min-width:110px;
+    padding:13px 12px;
     background:none;
     border:none;
     font-family:'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
     font-weight:700;
-    font-size:.85rem;
+    font-size:.8rem;
     color:var(--ink-soft);
     cursor:pointer;
     border-bottom:3px solid transparent;
@@ -134,6 +134,16 @@
     border-radius:20px;
     font-weight:500;
   }
+  .card .note{
+    font-size:.78rem;
+    color:var(--ink-soft);
+    background:var(--paper);
+    border-right:3px solid var(--ochre);
+    padding:8px 10px;
+    border-radius:6px;
+    margin-bottom:12px;
+    line-height:1.6;
+  }
 
   .field-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
   .field{flex:1;min-width:110px;display:flex;flex-direction:column;gap:4px;}
@@ -164,6 +174,11 @@
     padding:6px 8px;font-size:.82rem;border:1px solid var(--line);border-radius:5px;flex:1;min-width:70px;
   }
   .opening-row span, .item-row span{font-size:.75rem;color:var(--ink-soft);}
+  .opening-row.quick-tag{background:var(--paper);}
+  .opening-row .tag-label{
+    font-size:.72rem;font-weight:700;color:var(--blueprint-dark);
+    background:var(--paper-dark);padding:3px 8px;border-radius:20px;flex:0 0 auto;
+  }
 
   .btn{
     border:none;
@@ -183,6 +198,12 @@
   .btn-danger{background:transparent;color:#a3392e;border:1px solid #d9b3ae;padding:5px 9px;font-size:.75rem;}
   .btn-danger:hover{background:#f7e8e6;}
   .btn-sm{padding:5px 10px;font-size:.75rem;}
+  .quick-btns{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px;}
+  .btn-quick{
+    background:var(--blueprint-dark);color:#fff;border:none;border-radius:20px;
+    padding:6px 14px;font-size:.75rem;font-family:'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;font-weight:700;cursor:pointer;
+  }
+  .btn-quick:hover{background:var(--blueprint);}
 
   .room-block{
     border:1px solid var(--line);
@@ -223,6 +244,21 @@
     padding:20px;
     border:1px dashed var(--line);
     border-radius:8px;
+  }
+
+  .quick-result-box{
+    margin-top:14px;
+    padding:14px;
+    background:var(--blueprint-dark);
+    color:#fff;
+    border-radius:10px;
+  }
+  .quick-result-box .row{display:flex;justify-content:space-between;font-size:.85rem;padding:4px 0;color:#c9d6dc;}
+  .quick-result-box .final{
+    display:flex;justify-content:space-between;
+    font-weight:900;font-size:1.2rem;color:var(--ochre-soft);
+    border-top:1px dashed rgba(255,255,255,.25);margin-top:8px;padding-top:8px;
+    font-family:'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
   }
 
   /* Report */
@@ -274,17 +310,6 @@
     font-size:2rem;
     color:var(--ochre-soft);
   }
-  .stamp{
-    position:absolute;
-    top:10px;left:10px;
-    font-family:'Cairo', 'Segoe UI', Tahoma, Arial, sans-serif;
-    font-size:.65rem;
-    color:var(--ink-soft);
-    opacity:.6;
-    border:1px solid var(--line);
-    padding:2px 8px;
-    border-radius:20px;
-  }
   .report-actions{display:flex;gap:8px;margin-bottom:16px;}
 
   @media print{
@@ -300,7 +325,7 @@
 
 <header class="top">
   <h1>حاسبة مصنعية التشطيبات</h1>
-  <div class="sub">دهانات · جبس وديكورات · أخشاب — بدون خامات</div>
+  <div class="sub">دهانات · جبس وديكورات · أخشاب · تركيبات · يوميات — بدون خامات</div>
   <div class="project-meta">
     <input id="projectName" placeholder="اسم المشروع (مثال: فيلا التجمع الخامس)">
     <input id="clientName" placeholder="اسم العميل">
@@ -309,35 +334,84 @@
 </header>
 
 <nav class="tabs">
-  <button class="tab-btn active" data-tab="rooms">الحوائط والأسقف</button>
+  <button class="tab-btn active" data-tab="quick">مقايسة سريعة</button>
+  <button class="tab-btn" data-tab="rooms">الحوائط والأسقف</button>
+  <button class="tab-btn" data-tab="wood">الأخشاب</button>
   <button class="tab-btn" data-tab="gypsum">الجبس والديكورات</button>
-  <button class="tab-btn" data-tab="wood">دهانات الأخشاب</button>
+  <button class="tab-btn" data-tab="installations">التركيبات</button>
+  <button class="tab-btn" data-tab="operating">اليوميات والمواصلات</button>
   <button class="tab-btn" data-tab="report">التقرير النهائي</button>
 </nav>
 
 <main>
 
-  <!-- ROOMS TAB -->
-  <section id="rooms" class="tabpanel active">
-    <div id="roomsContainer"></div>
-    <button class="btn btn-primary" id="addRoomBtn">+ إضافة غرفة جديدة</button>
+  <!-- QUICK ESTIMATE TAB -->
+  <section id="quick" class="tabpanel active">
+    <div class="card">
+      <h2>مقايسة سريعة تقديرية <span class="tag">قبل التفصيل</span></h2>
+      <div class="note">
+        ده رقم تقريبي سريع بس، مبني على افتراض إن مساحة الحوائط ≈ 3 أضعاف مساحة الأرضية، ومساحة الأسقف = مساحة الأرضية.
+        الرقم ده <strong>مش</strong> بيتحسب ضمن التقرير النهائي — التقرير النهائي بيعتمد على القياسات الفعلية في تبويب "الحوائط والأسقف".
+      </div>
+      <div class="field-row">
+        <div class="field"><label>مساحة أرضية الشقة الإجمالية (م²)</label><input type="number" step="0.01" id="quickFloorArea"></div>
+        <div class="field"><label>سعر متر النقاشة المتفق عليه (ج.م/م²)</label><input type="number" step="0.01" id="quickPrice"></div>
+      </div>
+      <div class="quick-result-box" id="quickResultBox"></div>
+    </div>
   </section>
 
-  <!-- GYPSUM TAB -->
-  <section id="gypsum" class="tabpanel">
-    <div class="card">
-      <h2>بنود الجبس والكرانيش والديكورات <span class="tag">حسب البند</span></h2>
-      <div class="item-list" id="gypsumList"></div>
-      <button class="btn btn-ochre btn-sm" id="addGypsumBtn">+ إضافة بند</button>
-    </div>
+  <!-- ROOMS TAB -->
+  <section id="rooms" class="tabpanel">
+    <div id="roomsContainer"></div>
+    <button class="btn btn-primary" id="addRoomBtn">+ إضافة غرفة جديدة</button>
   </section>
 
   <!-- WOOD TAB -->
   <section id="wood" class="tabpanel">
     <div class="card">
       <h2>دهانات الأخشاب <span class="tag">بالقطعة</span></h2>
+      <div class="note">أمثلة: باب رئيسي، باب غرفة، باب حمام/مطبخ، شباك درفة، شباك درفتين، باب بلكونة (باب + شباك) — كل قطعة بسعرها المستقل.</div>
       <div class="item-list" id="woodList"></div>
       <button class="btn btn-ochre btn-sm" id="addWoodBtn">+ إضافة قطعة خشب</button>
+    </div>
+  </section>
+
+  <!-- GYPSUM TAB -->
+  <section id="gypsum" class="tabpanel">
+    <div class="card">
+      <h2>بنود الجبس والكرانيش والديكورات <span class="tag">حسب البند</span></h2>
+      <div class="note">أمثلة: كرانيش جبس بلدي/بورد (م.ط)، أسقف معلقة جبس بورد أو بيت نور/علالي (م² أو م.ط)، فرم وديكورات وسرّات (قطعة).</div>
+      <div class="item-list" id="gypsumList"></div>
+      <button class="btn btn-ochre btn-sm" id="addGypsumBtn">+ إضافة بند</button>
+    </div>
+  </section>
+
+  <!-- INSTALLATIONS TAB -->
+  <section id="installations" class="tabpanel">
+    <div class="card">
+      <h2>التركيبات الديكورية <span class="tag">قسم مستقل تماماً</span></h2>
+      <div class="note">بانوهات، ألواح بديل رخام، ألواح بديل خشب، شب بورد/شيب بورد، زوايا، كرانيش فيوتيك. القسم ده بيتحسب مستقل بذاته ومش مرتبط بأي نسب أو حسابات من الأقسام التانية.</div>
+      <div class="item-list" id="installList"></div>
+      <button class="btn btn-ochre btn-sm" id="addInstallBtn">+ إضافة بند تركيب</button>
+    </div>
+  </section>
+
+  <!-- OPERATING EXPENSES TAB -->
+  <section id="operating" class="tabpanel">
+    <div class="card">
+      <h2>يوميات الصنايعية <span class="tag">قسم مستقل</span></h2>
+      <div class="note">القسم ده بيتحسب مستقل تمامًا ومنفصل عن صافي مصنعية المشروع — بيظهر في التقرير النهائي كبند منفصل بذاته من غير ما يتضاف على الإجمالي.</div>
+      <div class="field-row">
+        <div class="field"><label>عدد أيام العمل (يوميات)</label><input type="number" step="1" min="0" id="laborDays"></div>
+        <div class="field"><label>أجر اليومية (ج.م)</label><input type="number" step="0.01" id="laborWage"></div>
+      </div>
+      <div class="subtotal-line" id="laborSubtotal"><span>إجمالي اليوميات</span><span>0 ج.م</span></div>
+    </div>
+    <div class="card">
+      <h2>مصاريف المواصلات والانتقالات</h2>
+      <div class="item-list" id="transportList"></div>
+      <button class="btn btn-ochre btn-sm" id="addTransportBtn">+ إضافة مصروف انتقال</button>
     </div>
   </section>
 
@@ -356,11 +430,17 @@
 let state = {
   projectName: '',
   clientName: '',
+  quickFloorArea: '',
+  quickPrice: '',
   rooms: [],
   gypsumItems: [],
-  woodItems: []
+  woodItems: [],
+  installItems: [],
+  laborDays: '',
+  laborWage: '',
+  transportItems: []
 };
-let roomCounter = 0, gypsumCounter = 0, woodCounter = 0;
+let roomCounter = 0, gypsumCounter = 0, woodCounter = 0, installCounter = 0, transportCounter = 0;
 
 // ---------- Persistence ----------
 async function saveState(){
@@ -386,8 +466,8 @@ function newRoom(){
   roomCounter++;
   return { id:'r'+roomCounter+'-'+Date.now(), name:'', perimeter:'', height:'', ceilingL:'', ceilingW:'', price:'', openings:[] };
 }
-function newOpening(){
-  return { id:'o'+Date.now()+Math.random().toString(16).slice(2), w:'', h:'', qty:1 };
+function newOpening(w, h, qty){
+  return { id:'o'+Date.now()+Math.random().toString(16).slice(2), w: w!==undefined?w:'', h: h!==undefined?h:'', qty: qty!==undefined?qty:1 };
 }
 function newGypsumItem(){
   gypsumCounter++;
@@ -396,6 +476,14 @@ function newGypsumItem(){
 function newWoodItem(){
   woodCounter++;
   return { id:'w'+woodCounter+'-'+Date.now(), name:'', qty:1, price:'' };
+}
+function newInstallItem(){
+  installCounter++;
+  return { id:'i'+installCounter+'-'+Date.now(), name:'', unit:'م²', qty:'', price:'' };
+}
+function newTransportItem(){
+  transportCounter++;
+  return { id:'t'+transportCounter+'-'+Date.now(), name:'', amount:'' };
 }
 
 // ---------- Calculations ----------
@@ -415,12 +503,22 @@ function calcRoom(room){
 }
 function calcGypsum(item){ return num(item.qty) * num(item.price); }
 function calcWood(item){ return num(item.qty || 1) * num(item.price); }
+function calcInstall(item){ return num(item.qty) * num(item.price); }
+function calcTransport(item){ return num(item.amount); }
+function calcLabor(){ return num(state.laborDays) * num(state.laborWage); }
 
 function totals(){
   const roomsTotal = state.rooms.reduce((s,r)=> s + calcRoom(r).cost, 0);
   const gypsumTotal = state.gypsumItems.reduce((s,g)=> s + calcGypsum(g), 0);
   const woodTotal = state.woodItems.reduce((s,w)=> s + calcWood(w), 0);
-  return { roomsTotal, gypsumTotal, woodTotal, grand: roomsTotal + gypsumTotal + woodTotal };
+  const installTotal = state.installItems.reduce((s,i)=> s + calcInstall(i), 0);
+  const laborTotal = calcLabor();
+  const transportTotal = state.transportItems.reduce((s,t)=> s + calcTransport(t), 0);
+  const operatingTotal = laborTotal + transportTotal;
+  return {
+    roomsTotal, gypsumTotal, woodTotal, installTotal, laborTotal, transportTotal, operatingTotal,
+    grand: roomsTotal + gypsumTotal + woodTotal + installTotal
+  };
 }
 
 // ---------- In-place updates (no DOM rebuild -> keyboard & focus stay put) ----------
@@ -444,6 +542,42 @@ function updateGypsumCost(item){
 function updateWoodCost(item){
   const el = document.getElementById('wood-cost-'+item.id);
   if(el) el.textContent = fmt(calcWood(item)) + ' ج.م';
+}
+function updateInstallCost(item){
+  const el = document.getElementById('install-cost-'+item.id);
+  if(el) el.textContent = fmt(calcInstall(item)) + ' ج.م';
+}
+function updateTransportCost(item){
+  const el = document.getElementById('transport-cost-'+item.id);
+  if(el) el.textContent = fmt(calcTransport(item)) + ' ج.م';
+}
+function updateLaborSubtotal(){
+  const el = document.querySelector('#laborSubtotal span:last-child');
+  if(el) el.textContent = fmt(calcLabor()) + ' ج.م';
+}
+function updateQuickResult(){
+  const box = document.getElementById('quickResultBox');
+  const floor = num(state.quickFloorArea);
+  const price = num(state.quickPrice);
+  const wallEst = floor * 3;
+  const ceilEst = floor;
+  const totalEst = wallEst + ceilEst;
+  const cost = totalEst * price;
+  box.innerHTML = `
+    <div class="row"><span>مساحة الأرضية</span><span>${fmt(floor)} م²</span></div>
+    <div class="row"><span>مساحة الحوائط التقديرية (×3)</span><span>${fmt(wallEst)} م²</span></div>
+    <div class="row"><span>مساحة الأسقف التقديرية (= الأرضية)</span><span>${fmt(ceilEst)} م²</span></div>
+    <div class="row"><span>إجمالي المساحة التقديرية</span><span>${fmt(totalEst)} م²</span></div>
+    <div class="row"><span>سعر المتر</span><span>${fmt(price)} ج.م</span></div>
+    <div class="final"><span>التكلفة التقديرية السريعة</span><span>${fmt(cost)} ج.م</span></div>
+  `;
+}
+
+// ---------- Rendering: Quick estimate ----------
+function bindQuickInputs(){
+  document.getElementById('quickFloorArea').value = state.quickFloorArea || '';
+  document.getElementById('quickPrice').value = state.quickPrice || '';
+  updateQuickResult();
 }
 
 // ---------- Rendering: Rooms ----------
@@ -478,7 +612,11 @@ function renderRooms(){
       <div style="margin-top:8px;">
         <label style="font-size:.75rem;color:var(--ink-soft);font-weight:600;">الفتحات (أبواب / شبابيك / بلكونات) تُطرح من الحوائط</label>
         <div class="openings-list" data-openings-for="${room.id}"></div>
-        <button class="btn btn-outline btn-sm" data-action="add-opening" data-id="${room.id}" style="margin-top:6px;">+ إضافة فتحة</button>
+        <div class="quick-btns">
+          <button class="btn-quick" data-action="quick-door" data-id="${room.id}">+ باب (خصم 2م²)</button>
+          <button class="btn-quick" data-action="quick-window" data-id="${room.id}">+ شباك (خصم 1م²)</button>
+          <button class="btn btn-outline btn-sm" data-action="add-opening" data-id="${room.id}">+ فتحة مخصّصة</button>
+        </div>
       </div>
 
       <div class="room-result" data-room-result="${room.id}">
@@ -507,6 +645,30 @@ function renderRooms(){
         openingsContainer.appendChild(row);
       });
     }
+  });
+}
+
+// ---------- Rendering: Wood ----------
+function renderWood(){
+  const list = document.getElementById('woodList');
+  if(state.woodItems.length === 0){
+    list.innerHTML = '<div class="empty-note">لا توجد قطع أخشاب بعد.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.woodItems.forEach(item=>{
+    const cost = calcWood(item);
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.id = 'wood-row-' + item.id;
+    row.innerHTML = `
+      <input placeholder="نوع القطعة (باب رئيسي، شباك درفتين...)" data-action="wood-field" data-field="name" data-id="${item.id}" value="${item.name}" style="min-width:200px;">
+      <input type="number" step="1" min="1" placeholder="العدد" data-action="wood-field" data-field="qty" data-id="${item.id}" value="${item.qty}">
+      <input type="number" step="0.01" placeholder="سعر القطعة" data-action="wood-field" data-field="price" data-id="${item.id}" value="${item.price}">
+      <span id="wood-cost-${item.id}" style="font-weight:700;color:var(--blueprint-dark);white-space:nowrap;">${fmt(cost)} ج.م</span>
+      <button class="btn btn-danger btn-sm" data-action="del-wood" data-id="${item.id}">حذف</button>
+    `;
+    list.appendChild(row);
   });
 }
 
@@ -539,25 +701,58 @@ function renderGypsum(){
   });
 }
 
-// ---------- Rendering: Wood ----------
-function renderWood(){
-  const list = document.getElementById('woodList');
-  if(state.woodItems.length === 0){
-    list.innerHTML = '<div class="empty-note">لا توجد قطع أخشاب بعد.</div>';
+// ---------- Rendering: Installations ----------
+function renderInstallations(){
+  const list = document.getElementById('installList');
+  if(state.installItems.length === 0){
+    list.innerHTML = '<div class="empty-note">لا توجد بنود تركيبات بعد.</div>';
     return;
   }
   list.innerHTML = '';
-  state.woodItems.forEach(item=>{
-    const cost = calcWood(item);
+  state.installItems.forEach(item=>{
+    const cost = calcInstall(item);
     const row = document.createElement('div');
     row.className = 'item-row';
-    row.id = 'wood-row-' + item.id;
+    row.id = 'install-row-' + item.id;
     row.innerHTML = `
-      <input placeholder="نوع القطعة (باب رئيسي، شباك درفتين...)" data-action="wood-field" data-field="name" data-id="${item.id}" value="${item.name}" style="min-width:200px;">
-      <input type="number" step="1" min="1" placeholder="العدد" data-action="wood-field" data-field="qty" data-id="${item.id}" value="${item.qty}">
-      <input type="number" step="0.01" placeholder="سعر القطعة" data-action="wood-field" data-field="price" data-id="${item.id}" value="${item.price}">
-      <span id="wood-cost-${item.id}" style="font-weight:700;color:var(--blueprint-dark);white-space:nowrap;">${fmt(cost)} ج.م</span>
-      <button class="btn btn-danger btn-sm" data-action="del-wood" data-id="${item.id}">حذف</button>
+      <input placeholder="اسم البند (بانوهات، بديل رخام، شب بورد، زوايا...)" data-action="install-field" data-field="name" data-id="${item.id}" value="${item.name}" style="min-width:180px;">
+      <select data-action="install-field" data-field="unit" data-id="${item.id}">
+        <option value="م.ط" ${item.unit==='م.ط'?'selected':''}>متر طولي</option>
+        <option value="م²" ${item.unit==='م²'?'selected':''}>متر مربع</option>
+        <option value="قطعة" ${item.unit==='قطعة'?'selected':''}>قطعة</option>
+      </select>
+      <input type="number" step="0.01" placeholder="الكمية" data-action="install-field" data-field="qty" data-id="${item.id}" value="${item.qty}">
+      <input type="number" step="0.01" placeholder="سعر الوحدة" data-action="install-field" data-field="price" data-id="${item.id}" value="${item.price}">
+      <span id="install-cost-${item.id}" style="font-weight:700;color:var(--blueprint-dark);white-space:nowrap;">${fmt(cost)} ج.م</span>
+      <button class="btn btn-danger btn-sm" data-action="del-install" data-id="${item.id}">حذف</button>
+    `;
+    list.appendChild(row);
+  });
+}
+
+// ---------- Rendering: Operating expenses ----------
+function bindOperatingInputs(){
+  document.getElementById('laborDays').value = state.laborDays || '';
+  document.getElementById('laborWage').value = state.laborWage || '';
+  updateLaborSubtotal();
+  renderTransport();
+}
+function renderTransport(){
+  const list = document.getElementById('transportList');
+  if(state.transportItems.length === 0){
+    list.innerHTML = '<div class="empty-note">لا توجد مصاريف انتقال مضافة.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  state.transportItems.forEach(item=>{
+    const row = document.createElement('div');
+    row.className = 'item-row';
+    row.id = 'transport-row-' + item.id;
+    row.innerHTML = `
+      <input placeholder="الوصف (نقل معدات، انتقالات الصنايعية...)" data-action="transport-field" data-field="name" data-id="${item.id}" value="${item.name}" style="min-width:200px;">
+      <input type="number" step="0.01" placeholder="المبلغ" data-action="transport-field" data-field="amount" data-id="${item.id}" value="${item.amount}">
+      <span id="transport-cost-${item.id}" style="font-weight:700;color:var(--blueprint-dark);white-space:nowrap;">${fmt(calcTransport(item))} ج.م</span>
+      <button class="btn btn-danger btn-sm" data-action="del-transport" data-id="${item.id}">حذف</button>
     `;
     list.appendChild(row);
   });
@@ -596,8 +791,26 @@ function renderReport(){
   }
   html += `<div class="subtotal-line"><span>إجمالي قسم الحوائط والأسقف</span><span>${fmt(t.roomsTotal)} ج.م</span></div>`;
 
+  // Wood section
+  html += `<div class="section-title-report">ثانياً: دهانات الأخشاب</div>`;
+  if(state.woodItems.length === 0){
+    html += `<div class="empty-note">لا توجد قطع مضافة</div>`;
+  } else {
+    html += `<table class="report-table"><thead><tr><th>نوع القطعة</th><th>العدد</th><th>سعر القطعة</th><th>الإجمالي</th></tr></thead><tbody>`;
+    state.woodItems.forEach(item=>{
+      html += `<tr>
+        <td>${item.name || '—'}</td>
+        <td>${fmt(num(item.qty))}</td>
+        <td>${fmt(num(item.price))}</td>
+        <td><strong>${fmt(calcWood(item))}</strong></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+  html += `<div class="subtotal-line"><span>إجمالي قسم دهانات الأخشاب</span><span>${fmt(t.woodTotal)} ج.م</span></div>`;
+
   // Gypsum section
-  html += `<div class="section-title-report">ثانياً: الجبس والكرانيش والديكورات</div>`;
+  html += `<div class="section-title-report">ثالثاً: الجبس والكرانيش والديكورات</div>`;
   if(state.gypsumItems.length === 0){
     html += `<div class="empty-note">لا توجد بنود مضافة</div>`;
   } else {
@@ -615,26 +828,41 @@ function renderReport(){
   }
   html += `<div class="subtotal-line"><span>إجمالي قسم الجبس والديكورات</span><span>${fmt(t.gypsumTotal)} ج.م</span></div>`;
 
-  // Wood section
-  html += `<div class="section-title-report">ثالثاً: دهانات الأخشاب</div>`;
-  if(state.woodItems.length === 0){
-    html += `<div class="empty-note">لا توجد قطع مضافة</div>`;
+  // Installations section (independent)
+  html += `<div class="section-title-report">رابعاً: التركيبات الديكورية (قسم مستقل)</div>`;
+  if(state.installItems.length === 0){
+    html += `<div class="empty-note">لا توجد بنود تركيبات مضافة</div>`;
   } else {
-    html += `<table class="report-table"><thead><tr><th>نوع القطعة</th><th>العدد</th><th>سعر القطعة</th><th>الإجمالي</th></tr></thead><tbody>`;
-    state.woodItems.forEach(item=>{
+    html += `<table class="report-table"><thead><tr><th>البند</th><th>الوحدة</th><th>الكمية</th><th>سعر الوحدة</th><th>الإجمالي</th></tr></thead><tbody>`;
+    state.installItems.forEach(item=>{
       html += `<tr>
         <td>${item.name || '—'}</td>
+        <td>${item.unit}</td>
         <td>${fmt(num(item.qty))}</td>
         <td>${fmt(num(item.price))}</td>
-        <td><strong>${fmt(calcWood(item))}</strong></td>
+        <td><strong>${fmt(calcInstall(item))}</strong></td>
       </tr>`;
     });
     html += `</tbody></table>`;
   }
-  html += `<div class="subtotal-line"><span>إجمالي قسم دهانات الأخشاب</span><span>${fmt(t.woodTotal)} ج.م</span></div>`;
+  html += `<div class="subtotal-line"><span>إجمالي قسم التركيبات الديكورية</span><span>${fmt(t.installTotal)} ج.م</span></div>`;
+
+  // Operating expenses section (fully independent — NOT included in grand total)
+  html += `<div class="section-title-report">خامساً: يوميات الصنايعية والمواصلات <span style="font-size:.7rem;color:var(--ink-soft);font-weight:400;">(قسم مستقل تمامًا — غير مضاف للصافي)</span></div>`;
+  html += `<table class="report-table"><thead><tr><th>البند</th><th>التفاصيل</th><th>الإجمالي</th></tr></thead><tbody>`;
+  html += `<tr><td>يوميات الصنايعية</td><td>${fmt(num(state.laborDays))} يوم × ${fmt(num(state.laborWage))} ج.م</td><td><strong>${fmt(t.laborTotal)}</strong></td></tr>`;
+  if(state.transportItems.length === 0){
+    html += `<tr><td colspan="3" style="text-align:center;color:var(--ink-soft);">لا توجد مصاريف انتقال مضافة</td></tr>`;
+  } else {
+    state.transportItems.forEach(item=>{
+      html += `<tr><td>${item.name || '—'}</td><td>مواصلات/انتقال</td><td><strong>${fmt(calcTransport(item))}</strong></td></tr>`;
+    });
+  }
+  html += `</tbody></table>`;
+  html += `<div class="subtotal-line" style="background:#eee3cf;border:1px dashed var(--ochre);"><span>إجمالي اليوميات والمواصلات (مستقل — غير محسوب ضمن مصنعية المشروع)</span><span>${fmt(t.operatingTotal)} ج.م</span></div>`;
 
   html += `<div class="grand-total-box">
-    <div class="label">الصافي النهائي لمصنعية المشروع بالكامل</div>
+    <div class="label">الصافي النهائي لمصنعية المشروع (حوائط وأسقف + أخشاب + جبس وديكورات + تركيبات)</div>
     <div class="amount">${fmt(t.grand)} ج.م</div>
   </div>`;
 
@@ -642,9 +870,12 @@ function renderReport(){
 }
 
 function renderAll(){
+  bindQuickInputs();
   renderRooms();
-  renderGypsum();
   renderWood();
+  renderGypsum();
+  renderInstallations();
+  bindOperatingInputs();
   renderReport();
 }
 
@@ -652,6 +883,12 @@ function renderAll(){
 document.addEventListener('input', (e)=>{
   const t = e.target;
   const action = t.dataset.action;
+
+  if(t.id === 'quickFloorArea'){ state.quickFloorArea = t.value; updateQuickResult(); saveState(); return; }
+  if(t.id === 'quickPrice'){ state.quickPrice = t.value; updateQuickResult(); saveState(); return; }
+  if(t.id === 'laborDays'){ state.laborDays = t.value; updateLaborSubtotal(); saveState(); return; }
+  if(t.id === 'laborWage'){ state.laborWage = t.value; updateLaborSubtotal(); saveState(); return; }
+
   if(action === 'room-field'){
     const room = state.rooms.find(r=>r.id===t.dataset.id);
     if(room){
@@ -675,6 +912,12 @@ document.addEventListener('input', (e)=>{
   } else if(action === 'wood-field'){
     const item = state.woodItems.find(w=>w.id===t.dataset.id);
     if(item){ item[t.dataset.field] = t.value; updateWoodCost(item); saveState(); }
+  } else if(action === 'install-field'){
+    const item = state.installItems.find(i=>i.id===t.dataset.id);
+    if(item){ item[t.dataset.field] = t.value; updateInstallCost(item); saveState(); }
+  } else if(action === 'transport-field'){
+    const item = state.transportItems.find(x=>x.id===t.dataset.id);
+    if(item){ item[t.dataset.field] = t.value; updateTransportCost(item); saveState(); }
   } else if(t.id === 'projectName'){
     state.projectName = t.value; saveState();
   } else if(t.id === 'clientName'){
@@ -688,10 +931,13 @@ document.addEventListener('change', (e)=>{
     const item = state.gypsumItems.find(g=>g.id===t.dataset.id);
     if(item){ item.unit = t.value; updateGypsumCost(item); saveState(); }
   }
+  if(t.dataset.action === 'install-field' && t.tagName === 'SELECT'){
+    const item = state.installItems.find(i=>i.id===t.dataset.id);
+    if(item){ item.unit = t.value; updateInstallCost(item); saveState(); }
+  }
 });
 
 // Helper: after adding a new item, scroll it into view and focus its first input
-// without jumping the page around or fighting the keyboard.
 function focusNewElement(elId, inputSelector){
   requestAnimationFrame(()=>{
     const el = document.getElementById(elId);
@@ -714,16 +960,28 @@ document.addEventListener('click', (e)=>{
     focusNewElement('room-block-'+room.id, 'input[data-field="name"]');
     return;
   }
+  if(t.id === 'addWoodBtn'){
+    const item = newWoodItem();
+    state.woodItems.push(item); renderWood(); renderReport(); saveState();
+    focusNewElement('wood-row-'+item.id, 'input[data-field="name"]');
+    return;
+  }
   if(t.id === 'addGypsumBtn'){
     const item = newGypsumItem();
     state.gypsumItems.push(item); renderGypsum(); renderReport(); saveState();
     focusNewElement('gypsum-row-'+item.id, 'input[data-field="name"]');
     return;
   }
-  if(t.id === 'addWoodBtn'){
-    const item = newWoodItem();
-    state.woodItems.push(item); renderWood(); renderReport(); saveState();
-    focusNewElement('wood-row-'+item.id, 'input[data-field="name"]');
+  if(t.id === 'addInstallBtn'){
+    const item = newInstallItem();
+    state.installItems.push(item); renderInstallations(); renderReport(); saveState();
+    focusNewElement('install-row-'+item.id, 'input[data-field="name"]');
+    return;
+  }
+  if(t.id === 'addTransportBtn'){
+    const item = newTransportItem();
+    state.transportItems.push(item); renderTransport(); renderReport(); saveState();
+    focusNewElement('transport-row-'+item.id, 'input[data-field="name"]');
     return;
   }
   if(t.id === 'refreshReportBtn'){ renderReport(); return; }
@@ -741,18 +999,42 @@ document.addEventListener('click', (e)=>{
     }
     return;
   }
+  if(action === 'quick-door'){
+    const room = state.rooms.find(r=>r.id===t.dataset.id);
+    if(room){
+      room.openings.push(newOpening(1, 2, 1)); // 1×2 = 2 م²
+      renderRooms(); renderReport(); saveState();
+    }
+    return;
+  }
+  if(action === 'quick-window'){
+    const room = state.rooms.find(r=>r.id===t.dataset.id);
+    if(room){
+      room.openings.push(newOpening(1, 1, 1)); // 1×1 = 1 م²
+      renderRooms(); renderReport(); saveState();
+    }
+    return;
+  }
   if(action === 'del-opening'){
     const room = state.rooms.find(r=>r.id===t.dataset.room);
     if(room){ room.openings = room.openings.filter(o=>o.id!==t.dataset.op); renderRooms(); renderReport(); saveState(); }
     return;
   }
+  if(action === 'del-wood'){
+    state.woodItems = state.woodItems.filter(w=>w.id!==t.dataset.id);
+    renderWood(); renderReport(); saveState(); return;
+  }
   if(action === 'del-gypsum'){
     state.gypsumItems = state.gypsumItems.filter(g=>g.id!==t.dataset.id);
     renderGypsum(); renderReport(); saveState(); return;
   }
-  if(action === 'del-wood'){
-    state.woodItems = state.woodItems.filter(w=>w.id!==t.dataset.id);
-    renderWood(); renderReport(); saveState(); return;
+  if(action === 'del-install'){
+    state.installItems = state.installItems.filter(i=>i.id!==t.dataset.id);
+    renderInstallations(); renderReport(); saveState(); return;
+  }
+  if(action === 'del-transport'){
+    state.transportItems = state.transportItems.filter(x=>x.id!==t.dataset.id);
+    renderTransport(); renderReport(); saveState(); return;
   }
 });
 
